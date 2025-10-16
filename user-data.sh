@@ -17,7 +17,15 @@ function install_deps {
     yum install -y yum-utils shadow-utils
     yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
     
-    # Install Vault Enterprise - specific version or latest
+    # Update system packages first (before installing Vault)
+    yum update -y
+    
+    # Install supporting tools
+    yum -y install jq <"/dev/null"
+    yum -y install nc <"/dev/null"
+    yum install awscli -y
+    
+    # Install Vault Enterprise - specific version or latest (after updates)
     if [ -n "$VAULT_VERSION" ]; then
         echo "Installing Vault Enterprise version: $VAULT_VERSION"
         yum -y install vault-enterprise-$VAULT_VERSION <"/dev/null"
@@ -25,11 +33,6 @@ function install_deps {
         echo "Installing latest Vault Enterprise version"
         yum -y install vault-enterprise <"/dev/null"
     fi
-    
-    yum -y install jq <"/dev/null"
-    yum -y install nc <"/dev/null"
-    yum update -y
-    yum install awscli -y
     
     # Get IMDSv2 token
     TOKEN=$(get_imds_token)

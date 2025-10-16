@@ -2,6 +2,7 @@
 
 # Variables passed from Terraform
 VAULT_LICENSE="${vault_license}"
+VAULT_VERSION="${vault_version}"
 REGION="${region}"
 NODE_COUNT="${node_count}"
 KMS_KEY_ID="${kms_key_id}"
@@ -15,7 +16,16 @@ function get_imds_token {
 function install_deps {
     yum install -y yum-utils shadow-utils
     yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
-    yum -y install vault-enterprise <"/dev/null"
+    
+    # Install Vault Enterprise - specific version or latest
+    if [ -n "$VAULT_VERSION" ]; then
+        echo "Installing Vault Enterprise version: $VAULT_VERSION"
+        yum -y install vault-enterprise-$VAULT_VERSION <"/dev/null"
+    else
+        echo "Installing latest Vault Enterprise version"
+        yum -y install vault-enterprise <"/dev/null"
+    fi
+    
     yum -y install jq <"/dev/null"
     yum -y install nc <"/dev/null"
     yum update -y

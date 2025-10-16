@@ -32,6 +32,12 @@ variable "vault_node_count" {
   }
 }
 
+variable "vault_version" {
+  description = "Vault Enterprise version to install (e.g., '1.15.0+ent-1'). Leave empty for latest version."
+  type        = string
+  default     = ""
+}
+
 variable "allowed_cidr_blocks" {
   description = "CIDR blocks allowed to access Vault"
   type        = list(string)

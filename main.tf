@@ -220,6 +220,7 @@ resource "aws_instance" "vault" {
 
   user_data = templatefile("${path.module}/user-data.sh", {
     vault_license = var.vault_license
+    vault_version = var.vault_version
     region        = var.aws_region
     node_count    = var.vault_node_count
     kms_key_id    = local.kms_key_id

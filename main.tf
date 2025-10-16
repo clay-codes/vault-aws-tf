@@ -46,22 +46,44 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-# Data source for default subnet in first available AZ
-data "aws_subnets" "default" {
+# Data source for any available subnets in the VPC
+data "aws_subnets" "available" {
   filter {
     name   = "vpc-id"
     values = [var.vpc_id]
   }
-  
-  filter {
-    name   = "default-for-az"
-    values = ["true"]
+}
+
+# KMS Key for Vault Auto-Unseal
+resource "aws_kms_key" "vault" {
+  count = var.kms_key_id == "" ? 1 : 0
+
+  description             = "${var.environment} Vault unseal key"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
+
+  tags = {
+    Name = "${var.environment}-vault-unseal-key"
   }
 }
 
+resource "aws_kms_alias" "vault" {
+  count = var.kms_key_id == "" ? 1 : 0
+
+  name          = "alias/${var.environment}-vault-unseal"
+  target_key_id = aws_kms_key.vault[0].key_id
+}
+
+data "aws_caller_identity" "current" {}
+
+# Local values
 locals {
-  # Use first default subnet found
-  default_subnet_id = data.aws_subnets.default.ids[0]
+  # Use first available subnet found in the VPC
+  subnet_id = data.aws_subnets.available.ids[0]
+  
+  # Use provided KMS key or created one
+  kms_key_id  = var.kms_key_id != "" ? var.kms_key_id : aws_kms_key.vault[0].id
+  kms_key_arn = var.kms_key_id != "" ? "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:key/${var.kms_key_id}" : aws_kms_key.vault[0].arn
 }
 
 # Create SSH key pair
@@ -191,7 +213,7 @@ resource "aws_instance" "vault" {
   ami           = data.aws_ami.amazon_linux_2.id
   instance_type = var.instance_type
   key_name      = aws_key_pair.vault.key_name
-  subnet_id     = local.default_subnet_id
+  subnet_id     = local.subnet_id
 
   vpc_security_group_ids = [aws_security_group.vault_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.vault_profile.name

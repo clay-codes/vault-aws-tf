@@ -144,7 +144,7 @@ EOF1
     # Only initialize on the first node (index 0)
     if [ "$INSTANCE_INDEX" = "0" ]; then
         echo "Initializing Vault on primary node..."
-        vault operator init -recovery-shares=5 -recovery-threshold=3 >/home/ec2-user/keys
+        vault operator init -recovery-shares=1 -recovery-threshold=1 >/home/ec2-user/keys
         
         # Extract recovery keys and root token
         grep 'Recovery Key' /home/ec2-user/keys | awk '{print $NF}' >/home/ec2-user/recovery_keys

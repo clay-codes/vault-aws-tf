@@ -1,4 +1,4 @@
-## INTRO
+## Intro
 Terraform repro to quickly deploy any number of nodes onto AWS in an HA Vault setup running on any version.
 
 ### Prerequisites

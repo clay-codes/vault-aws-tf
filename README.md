@@ -1,5 +1,5 @@
 ## Intro
-Terraform repro to quickly deploy any number of nodes onto AWS in an HA Vault setup running on any version.
+Terraform repro to quickly deploy any number of nodes onto AWS in an HA Vault setup running on any version.  Auto join and KMS auto unseal enabled.
 
 ### Prerequisites
 - Authentication to AWS CLI configured (via doormat for Hashi).
